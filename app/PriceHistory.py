@@ -46,15 +46,14 @@ class PriceHistory:
         # price_string = driver.find_element(By.CSS_SELECTOR, ".a-offscreen").text
         # price = parse_price(price_string)
 
-        symbol = driver.find_element(By.CSS_SELECTOR,".a-price-symbol").text  
-        whole = driver.find_element(By.CSS_SELECTOR,".a-price-whole").text        
-        fraction = driver.find_element(By.CSS_SELECTOR, ".a-price-fraction").text 
+        symbol = driver.find_element(By.CSS_SELECTOR, ".a-price-symbol").text
+        whole = driver.find_element(By.CSS_SELECTOR, ".a-price-whole").text
+        fraction = driver.find_element(By.CSS_SELECTOR, ".a-price-fraction").text
         price_string = f"{symbol}{whole}.{fraction}"
 
         self.amount = float(f"{whole}.{fraction}")
         self.currency = symbol
         self._price_string = price_string
- 
 
 
 if __name__ == "__main__":

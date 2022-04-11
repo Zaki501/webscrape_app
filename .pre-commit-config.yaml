@@ -23,18 +23,18 @@ repos:
         types: [python]
         exclude: setup.py
 
-      - id: pytest
-        name: pytest
-        stages: [commit]
-        language: system
-        entry: pipenv run pytest
-        types: [python]
-        pass_filenames: false
-        always_run: true
+      # - id: pytest
+      #   name: pytest
+      #   stages: [commit]
+      #   language: system
+      #   entry: pipenv run pytest
+      #   types: [python]
+      #   pass_filenames: false
+      #   always_run: true
 
-      - id: pytest-cov
-        name: pytest
-        stages: [push]
-        language: system
-        entry: pipenv run pytest --cov --cov-fail-under=100
-        types: [python]
+      # - id: pytest-cov
+      #   name: pytest
+      #   stages: [push]
+      #   language: system
+      #   entry: pipenv run pytest --cov --cov-fail-under=100
+      #   types: [python]

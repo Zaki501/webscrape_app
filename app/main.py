@@ -1,13 +1,11 @@
-# main functions, to be imported to app
-# track item(asin) -> PriceHistory, sent to DB
-# regular tracking -> list of asins, for each item,
 import re
 
 from app.constants import AMAZON
-# from database.create import init_connection
-# from database.methods import list_of_unique_asins
 from app.FirefoxWebDriver import FireFoxBrowser
 from app.PriceHistory import PriceHistory
+
+# from database.create import init_connection
+# from database.methods import list_of_unique_asins
 
 
 def extract_asin(url: str):
@@ -49,7 +47,8 @@ def regular_tracking(conn):
 
     # list of asins will be taken from database
 
-    asins = list_of_unique_asins(conn)
+    # asins = list_of_unique_asins(conn)
+    asins = []
 
     browser = FireFoxBrowser(headless=False, random_user_agent=True)
     with browser:
@@ -70,6 +69,6 @@ if __name__ == "__main__":
     #     item = track_item(browser, asin)
     #     print(item.__dict__)
     # pass
-    conn = init_connection()
+    # conn = init_connection()
 
     pass

@@ -1,15 +1,16 @@
 # test the browser and webscraper
-# browser - 
+# browser -
 # webscraper - go to amazon item, grab Pricehistory
 
-from app.FirefoxWebDriver import FireFoxBrowser
-from app.PriceHistory import PriceHistory
-from app.main import track_item, extract_asin
 from datetime import datetime
+
+from app.FirefoxWebDriver import FireFoxBrowser
+from app.main import extract_asin, track_item
+from app.PriceHistory import PriceHistory
 
 
 def test_browser():
-    """ Go to a static website, grab title"""
+    """Go to a static website, grab title"""
     driver = FireFoxBrowser()
     with driver:
         driver.get("http://info.cern.ch")
@@ -18,7 +19,7 @@ def test_browser():
 
 
 def test_pricehistory():
-    """ Enter an amazon asin, check if it returns an item"""
+    """Enter an amazon asin, check if it returns an item"""
     item = "https://www.amazon.co.uk/dp/B00006I551/"
     asin = extract_asin(item)
     driver = FireFoxBrowser()
