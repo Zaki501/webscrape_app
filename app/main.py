@@ -3,11 +3,11 @@
 # regular tracking -> list of asins, for each item,
 import re
 
-from constants import AMAZON
-from database.create import init_connection
-from database.methods import list_of_unique_asins
-from FirefoxWebDriver import FireFoxBrowser
-from PriceHistory import PriceHistory
+from app.constants import AMAZON
+# from database.create import init_connection
+# from database.methods import list_of_unique_asins
+from app.FirefoxWebDriver import FireFoxBrowser
+from app.PriceHistory import PriceHistory
 
 
 def extract_asin(url: str):

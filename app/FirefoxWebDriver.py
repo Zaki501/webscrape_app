@@ -7,7 +7,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.webdriver import WebDriver
 
-from constants import PATH_TO_DRIVER
+from app.constants import PATH_TO_DRIVER
 
 
 class FireFoxBrowser(WebDriver):

@@ -12,7 +12,7 @@ python-multipart = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
 selenium = "*"
-price-parser = "*"
+requests = "*"
 
 [dev-packages]
 flake8 = "*"

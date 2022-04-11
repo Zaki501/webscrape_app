@@ -1,11 +1,10 @@
 from datetime import datetime
 from decimal import Decimal
 
-from price_parser import parse_price
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.webdriver import WebDriver
 
-from constants import AMAZON
+from app.constants import AMAZON
 
 
 class PriceHistory:
@@ -43,10 +42,19 @@ class PriceHistory:
         self.date = datetime.now().strftime("%Y-%m-%d")
 
     def _set_price_and_currency(self, driver):
-        price_string = driver.find_element(By.CSS_SELECTOR, ".a-price").text
-        price = parse_price(price_string)
-        self.amount = price.amount_float
-        self.currency = price.currency
+        # price_string = driver.find_element(By.CSS_SELECTOR, ".a-price").text
+        # price_string = driver.find_element(By.CSS_SELECTOR, ".a-offscreen").text
+        # price = parse_price(price_string)
+
+        symbol = driver.find_element(By.CSS_SELECTOR,".a-price-symbol").text  
+        whole = driver.find_element(By.CSS_SELECTOR,".a-price-whole").text        
+        fraction = driver.find_element(By.CSS_SELECTOR, ".a-price-fraction").text 
+        price_string = f"{symbol}{whole}.{fraction}"
+
+        self.amount = float(f"{whole}.{fraction}")
+        self.currency = symbol
+        self._price_string = price_string
+ 
 
 
 if __name__ == "__main__":
