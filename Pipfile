@@ -11,7 +11,8 @@ fastapi = "*"
 python-multipart = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
-requests = "*"
+selenium = "*"
+price-parser = "*"
 
 [dev-packages]
 flake8 = "*"
