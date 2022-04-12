@@ -1,4 +1,6 @@
 # pydantic schemas
+from datetime import date
+from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel
@@ -13,6 +15,9 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
+############ User
+
+
 class UserBase(BaseModel):
     username: str
     email: Optional[str] = None
@@ -21,10 +26,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-
-
-# class UserForDB(UserBase):
-#     hashed_passowrd: str
 
 
 class User(UserBase):
@@ -37,3 +38,27 @@ class User(UserBase):
 
 class UserInDB(User):
     hashed_password: str
+
+
+######## Tables for database
+
+
+class Item(BaseModel):
+    asin: str
+    title: str
+    currency: str
+    current_amount: Decimal
+    disabled: bool
+
+
+class Alert(BaseModel):
+    asin: str
+    id: int
+    target_amount: Decimal
+
+
+class Price_History(BaseModel):
+    asin: str
+    date: date
+    currency: str
+    amount: Decimal

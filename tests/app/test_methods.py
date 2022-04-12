@@ -2,13 +2,16 @@
 # browser -
 # webscraper - go to amazon item, grab Pricehistory
 
-from datetime import datetime
+import datetime
+
+import pytest
 
 from app.FirefoxWebDriver import FireFoxBrowser
 from app.main import extract_asin, track_item
 from app.PriceHistory import PriceHistory
 
 
+@pytest.mark.integtest
 def test_browser():
     """Go to a static website, grab title"""
     driver = FireFoxBrowser()
@@ -18,6 +21,7 @@ def test_browser():
         assert driver.title == "http://info.cern.ch"
 
 
+@pytest.mark.integtest
 def test_pricehistory():
     """Enter an amazon asin, check if it returns an item"""
     item = "https://www.amazon.co.uk/dp/B00006I551/"
@@ -30,4 +34,4 @@ def test_pricehistory():
         assert p_h.currency == "£"
         assert 6 < p_h.amount < 20
         assert p_h.title == "CASIO F91W-1 Casual Sport Watch"
-        assert p_h.date == datetime.now().strftime("%Y-%m-%d")
+        assert p_h.date == datetime.date.today()
