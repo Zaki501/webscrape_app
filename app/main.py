@@ -1,5 +1,8 @@
 import re
 
+from fastapi import HTTPException
+from requests import Session
+
 from app.constants import AMAZON
 from app.FirefoxWebDriver import FireFoxBrowser
 from app.PriceHistory import PriceHistory
@@ -12,7 +15,7 @@ def extract_asin(url: str):
     """Extract asin from url"""
     asin = re.search("/[dg]p/([^/]+)", url, flags=re.IGNORECASE)
     if asin is None:
-        raise ValueError("No asin found in Url")
+        raise HTTPException(status_code=400, detail="Invalid Amazon URL")
     return asin.group(1)
 
 
@@ -29,6 +32,10 @@ def track_item(browser: FireFoxBrowser, asin: str):
     browser.get(address)
     # change pricehistory to take in driver and asin
     return PriceHistory(browser, asin)
+
+
+def item_in_db(db: Session):
+    pass
 
 
 def regular_tracking(conn):

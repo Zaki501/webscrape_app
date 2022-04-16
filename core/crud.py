@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy.orm import Session
 
 import core.models as models
@@ -5,14 +7,7 @@ import core.schemas as schemas
 from api.security import hash_password
 
 
-def get_user(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
-
-
-def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
-
-
+## Users
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
 
@@ -28,3 +23,83 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def read_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
+
+
+def read_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email == email).first()
+
+
+def update_user():
+    pass
+
+
+def delete_user(db: Session, user_id: int):
+    pass
+
+
+## Items
+# create pricehistory and update item every day
+def create_item(db: Session, PriceHistory: schemas.Price_History):
+    """Add item to database"""
+    db_item = models.Item(
+        asin=PriceHistory.asin,
+        title=PriceHistory.title,
+        currency=PriceHistory.currency,
+        current_amount=PriceHistory.amount,
+        disabled=False,
+    )
+
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+def read_item_by_asin(db: Session, asin: int):
+    return db.query(models.Item).filter(models.Item.asin == asin).first()
+
+
+def update_item(db: Session, PriceHistory: schemas.Price_History):
+    pass
+
+
+def delete_item():
+    pass
+
+
+## Alerts
+# update and delete - target by id or asin?
+
+
+def create_alert(
+    db: Session, id: int, target_price: Decimal, PriceHistory: schemas.Price_History
+):
+    """Create alert for current user"""
+
+    db_alert = models.Alert(
+        asin=PriceHistory.asin, user_id=id, target_amount=target_price
+    )
+
+    db.add(db_alert)
+    db.commit()
+    db.refresh(db_alert)
+    return db_alert
+
+
+def read_alerts(db: Session, id: int):
+    """Get all alerts for a user"""
+    pass
+
+
+def update_alert(db: Session, alert_id: int, target_price: Decimal):
+    """Update an existing alert with new target"""
+    pass
+
+
+def delete_alert(db: Session, alert_id: int):
+    """Delete alert"""
+    pass

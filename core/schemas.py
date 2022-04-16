@@ -43,7 +43,7 @@ class UserInDB(User):
 ######## Tables for database
 
 
-class Item(BaseModel):
+class ItemCreate(BaseModel):
     asin: str
     title: str
     currency: str
@@ -51,13 +51,19 @@ class Item(BaseModel):
     disabled: bool
 
 
+class Item(ItemCreate):
+    id: int
+
+
 class Alert(BaseModel):
+    id: int
     asin: str
     id: int
     target_amount: Decimal
 
 
 class Price_History(BaseModel):
+    id: int
     asin: str
     date: date
     currency: str
