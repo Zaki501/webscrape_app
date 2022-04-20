@@ -10,15 +10,14 @@ from app.FirefoxWebDriver import FireFoxBrowser
 from app.main import extract_asin, track_item
 from app.PriceHistory import PriceHistory
 
-
-@pytest.mark.integtest
-def test_browser():
-    """Go to a static website, grab title"""
-    driver = FireFoxBrowser()
-    with driver:
-        driver.get("http://info.cern.ch")
-        print(driver.title)
-        assert driver.title == "http://info.cern.ch"
+# @pytest.mark.integtest
+# def test_browser():
+#     """Go to a static website, grab title"""
+#     driver = FireFoxBrowser()
+#     with driver:
+#         driver.get("http://info.cern.ch")
+#         print(driver.title)
+#         assert driver.title == "http://info.cern.ch"
 
 
 @pytest.mark.integtest

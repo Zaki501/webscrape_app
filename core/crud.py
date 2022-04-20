@@ -33,6 +33,10 @@ def read_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
+def read_all_users(db: Session):
+    return db.query(models.User).all()
+
+
 def update_user():
     pass
 
@@ -67,6 +71,15 @@ def update_item(db: Session, PriceHistory: schemas.Price_History):
     pass
 
 
+def toggle_item(db: Session, item_id: int):
+    """Flip bool, disable/enable item"""
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    item.disabled = not item.disabled
+    db.commit()
+    db.refresh(item)
+    return item
+
+
 def delete_item():
     pass
 
@@ -92,7 +105,17 @@ def create_alert(
 
 def read_alerts(db: Session, id: int):
     """Get all alerts for a user"""
-    pass
+    return db.query(models.Alert).filter(models.Alert.user_id == id).all()
+
+
+def check_alerts(db: Session, id: int, asin: str):
+    """see if a user a particalar item tracked"""
+    return (
+        db.query(models.Alert)
+        .filter(models.Alert.user_id == id)
+        .filter(models.Alert.asin == asin)
+        .first()
+    )
 
 
 def update_alert(db: Session, alert_id: int, target_price: Decimal):

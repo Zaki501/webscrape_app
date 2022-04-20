@@ -1,5 +1,4 @@
-from random import randrange
-
+from tests.routes.test_alert import random_user
 from tests.routes.test_main import client
 
 existing_user = {
@@ -9,9 +8,7 @@ existing_user = {
     "password": "123",
 }
 
-# random str for user
-x = str(randrange(0, 900000000000000000))
-new_user = {"username": x, "email": x, "full_name": x, "password": x}
+new_user = random_user()
 
 
 def test_unauthorised_access():
