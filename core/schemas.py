@@ -12,16 +12,14 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[str] = None
 
 
 ############ User
 
 
 class UserBase(BaseModel):
-    username: str
     email: Optional[str] = None
-    full_name: Optional[str] = None
 
 
 class UserCreate(UserBase):

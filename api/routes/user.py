@@ -22,6 +22,18 @@ async def delete_user_me(
     return delete_user(db, current_user.id)
 
 
+@router.patch("/update")
+async def update_user_me(
+    current_user: schemas.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    # while logged in
+    # user re enters password, and fills out form
+    # if password matches (check this in front end), update user details
+    return {"message": "test"}
+    pass
+
+
 # UPDATING USER?
 
 # change password

@@ -40,8 +40,6 @@ def test_valid_registration():
     """User that doesnt exist"""
     response = client.post(url="/api/auth/register", json=new_user)
     assert response.status_code == 200
-    assert response.json()["username"] == new_user["username"]
-    assert response.json()["email"] == new_user["email"]
     assert response.json()["email"] == new_user["email"]
     assert response.json()["disabled"] is False
     pass

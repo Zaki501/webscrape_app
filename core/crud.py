@@ -12,9 +12,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
 
     db_user = models.User(
-        username=user.username,
         email=user.email,
-        full_name=user.full_name,
         disabled=False,
         hashed_password=hashed_password,
     )
@@ -29,10 +27,6 @@ def read_user_by_id(db: Session, id: int):
     return db.query(models.User).filter(models.User.id == id).first()
 
 
-def read_user_by_username(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
-
-
 def read_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
@@ -41,8 +35,11 @@ def read_all_users(db: Session):
     return db.query(models.User).all()
 
 
-def update_user():
-    pass
+def update_user_email(db: Session, user: schemas.User, user_id: int):
+    """ "asdad"""
+    user_in_db = db.query(models.User).filter(models.User.id == user_id).first()
+    user_in_db.email = user.email
+    # return
 
 
 def delete_user(db: Session, user_id: int):
