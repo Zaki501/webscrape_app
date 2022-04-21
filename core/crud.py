@@ -25,6 +25,10 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
+def read_user_by_id(db: Session, id: int):
+    return db.query(models.User).filter(models.User.id == id).first()
+
+
 def read_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
@@ -42,7 +46,9 @@ def update_user():
 
 
 def delete_user(db: Session, user_id: int):
-    pass
+    db.query(models.User).filter(models.User.id == user_id).delete()
+    db.commit()
+    return {"Message": "User succesfully deleted"}
 
 
 ## Items

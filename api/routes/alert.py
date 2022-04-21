@@ -28,8 +28,8 @@ async def all_alerts(
     return read_alerts(db, current_user.id)
 
 
-@router.get("/new_item")
-async def add_item_alert(
+@router.get("/new")
+async def create_new_alert(
     amazon_url: str,
     target_price: Decimal,
     current_user: schemas.User = Depends(get_current_active_user),

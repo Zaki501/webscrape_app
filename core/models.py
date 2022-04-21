@@ -9,7 +9,7 @@ class User(Base):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
-    username = Column(String)
+    username = Column(String, unique=True)
     email = Column(String, unique=True)
     full_name = Column(String)
     disabled = Column(Boolean, default=False)
