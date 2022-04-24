@@ -34,6 +34,11 @@ async def update_user_me(
     pass
 
 
+# update email - send confirmation to current email, new email
+# update password - current password, new passwod
+# forgot password - send temp password to email
+
+
 # UPDATING USER?
 
 # change password

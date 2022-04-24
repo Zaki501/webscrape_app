@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 
 import core.models as models
 import core.schemas as schemas
-from api.security import hash_password
+from api.security import create_hash
 
 
 ## Users
 def create_user(db: Session, user: schemas.UserCreate):
-    hashed_password = hash_password(user.password)
+    hashed_password = create_hash(user.password)
 
     db_user = models.User(
         email=user.email,
