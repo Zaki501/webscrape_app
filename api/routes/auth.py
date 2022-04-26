@@ -6,12 +6,9 @@ from sqlalchemy.orm import Session
 
 import core.crud as crud
 import core.schemas as schemas
-from api.security import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
-    authenticate_user,
-    create_access_token,
-)
+from api.security import authenticate_user, create_access_token
 from core.database import get_db
+from core.security import ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(tags=["Auth"], prefix="/api/auth")
 
@@ -44,3 +41,20 @@ async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # except IntegrityError:
     #     db.rollback()
     #     raise HTTPException(status_code=400, detail="Username already in use")
+
+
+@router.post("/reset_password", response_model=schemas.User)
+async def forgot_password(email: str, db: Session = Depends(get_db)):
+    # user enters email for forgotten password
+    # if user doesnt exist, raise error
+    # create token for user, send in email
+    # hash token and add to db
+
+    # current tokens are security risk? they are the same each minute
+    # rate? limit users password guesses
+    # check if reset request already sent
+    # disable user account while active
+
+    # totp tokens are time-based, and independent of client and server
+    # look into google auth
+    pass

@@ -2,47 +2,50 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+from passlib.totp import TOTP
 from sqlalchemy.orm import Session
 
-import core.models as models
+from core.crud import read_user_by_email
 from core.database import get_db
 from core.schemas import TokenData, User
-
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "7deaa6f0fdd89d91b8b824f35708dcd73db19b6b0921fc85fdc2be9ff1f8b067"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
-
-
-def get_user(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
-
-
-def create_hash(password):
-    return pwd_context.hash(password)
-
-
-def verify_hash(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+from core.security import (
+    ALGORITHM,
+    ENCODED_SECRET,
+    SECRET_KEY,
+    oauth2_scheme,
+    verify_hash,
+)
 
 
 def authenticate_user(db: Session, email: str, password: str):
     """Verify email and password match"""
-    user = get_user(db, email)
+    user = read_user_by_email(db, email)
     if not user:
         return False
     if not verify_hash(password, user.hashed_password):
         return False
     return user
+
+
+#######################################################
+
+# Reset password tokens
+
+
+def create_expiry_datetime():
+    now = datetime.datetime.now()
+    extra_time = datetime.timedelta(minutes=30)
+    return now + extra_time
+
+
+def is_expired(expirationDate: datetime):
+    return datetime.datetime.now() > expirationDate
+
+
+def create_token():
+    totp = TOTP(key=ENCODED_SECRET, digits=9)
+    return totp.generate().token
 
 
 #######################################################
@@ -83,7 +86,7 @@ async def get_current_user(
         token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = get_user(db, email=token_data.email)
+    user = read_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception
     return user

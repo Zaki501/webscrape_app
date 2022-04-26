@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 import core.models as models
 import core.schemas as schemas
-from api.security import create_hash
+from core.security import create_hash
 
 
 ## Users

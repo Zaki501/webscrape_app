@@ -14,6 +14,9 @@ class User(Base):
     hashed_password = Column(String)
 
     user_alert = relationship("Alert", back_populates="alert_user")
+    user_passwordreset = relationship(
+        "Password_Reset", back_populates="passwordreset_user"
+    )
 
 
 class Item(Base):
@@ -51,3 +54,14 @@ class Price_History(Base):
     amount = Column(Float)
 
     ph_item = relationship("Item", back_populates="item_ph")
+
+
+class Password_Reset(Base):
+    __tablename__ = "password_reset"
+
+    email = Column(String, ForeignKey("user.email"), primary_key=True)
+    token_hash = Column(String)
+    expiration = Column(Date)
+    token_used = Column(Boolean, default=False)
+
+    passwordreset_user = relationship("User", back_populates="user_passwordreset")
