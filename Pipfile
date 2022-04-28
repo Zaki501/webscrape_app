@@ -13,6 +13,7 @@ python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
 selenium = "*"
 requests = "*"
+slowapi = "*"
 
 [dev-packages]
 flake8 = "*"

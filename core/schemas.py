@@ -38,6 +38,14 @@ class UserInDB(User):
     hashed_password: str
 
 
+############ Password Reset
+class Password_Reset(BaseModel):
+    email: str
+    token_hash: str
+    expiration: date
+    token_used: bool
+
+
 ######## Tables for database
 
 

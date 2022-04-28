@@ -1,3 +1,6 @@
+import datetime
+import secrets
+
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
@@ -20,3 +23,17 @@ def create_hash(password):
 
 def verify_hash(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
+
+def generate_token():
+    return secrets.token_urlsafe(12)
+
+
+def create_expiry_datetime():
+    now = datetime.datetime.now()
+    extra_time = datetime.timedelta(minutes=30)
+    return now + extra_time
+
+
+def is_expired(expirationDate: datetime):
+    return datetime.datetime.now() > expirationDate

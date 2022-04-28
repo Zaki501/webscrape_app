@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 
 import core.models as models
 import core.schemas as schemas
-from core.security import create_hash
+from core.security import create_expiry_datetime, create_hash
 
 
 ## Users
-def create_user(db: Session, user: schemas.UserCreate):
+def create_user(db: Session, user: schemas.UserCreate) -> schemas.User:
     hashed_password = create_hash(user.password)
 
     db_user = models.User(
@@ -23,11 +23,11 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def read_user_by_id(db: Session, id: int):
+def read_user_by_id(db: Session, id: int) -> schemas.User:
     return db.query(models.User).filter(models.User.id == id).first()
 
 
-def read_user_by_email(db: Session, email: str):
+def read_user_by_email(db: Session, email: str) -> schemas.User:
     return db.query(models.User).filter(models.User.email == email).first()
 
 
@@ -129,3 +129,40 @@ def update_alert(db: Session, alert_id: int, target_price: Decimal):
 def delete_alert(db: Session, alert_id: int):
     """Delete alert"""
     pass
+
+
+## Password Reset
+
+
+def create_password_reset(db: Session, email: str, token: str):
+    """Create alert for current user"""
+    db_pass_reset = models.Password_Reset(
+        email=email,
+        token_hash=create_hash(token),
+        expiration=create_expiry_datetime(),
+        token_used=False,
+    )
+    db.add(db_pass_reset)
+    db.commit()
+    db.refresh(db_pass_reset)
+    return db_pass_reset
+
+
+def read_password_reset(
+    db: Session,
+    email: str,
+) -> schemas.Password_Reset:
+    """See if user has an active password reset"""
+    return (
+        db.query(models.Password_Reset)
+        .filter(models.Password_Reset.email == email)
+        .first()
+    )
+
+
+def delete_password_reset(db: Session, email: str):
+    db.query(models.Password_Reset).filter(
+        models.Password_Reset.email == email
+    ).delete()
+    db.commit()
+    return

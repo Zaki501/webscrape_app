@@ -3,19 +3,12 @@ from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
-from passlib.totp import TOTP
 from sqlalchemy.orm import Session
 
 from core.crud import read_user_by_email
 from core.database import get_db
 from core.schemas import TokenData, User
-from core.security import (
-    ALGORITHM,
-    ENCODED_SECRET,
-    SECRET_KEY,
-    oauth2_scheme,
-    verify_hash,
-)
+from core.security import ALGORITHM, SECRET_KEY, oauth2_scheme, verify_hash
 
 
 def authenticate_user(db: Session, email: str, password: str):
@@ -26,26 +19,6 @@ def authenticate_user(db: Session, email: str, password: str):
     if not verify_hash(password, user.hashed_password):
         return False
     return user
-
-
-#######################################################
-
-# Reset password tokens
-
-
-def create_expiry_datetime():
-    now = datetime.datetime.now()
-    extra_time = datetime.timedelta(minutes=30)
-    return now + extra_time
-
-
-def is_expired(expirationDate: datetime):
-    return datetime.datetime.now() > expirationDate
-
-
-def create_token():
-    totp = TOTP(key=ENCODED_SECRET, digits=9)
-    return totp.generate().token
 
 
 #######################################################
