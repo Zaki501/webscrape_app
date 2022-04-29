@@ -36,10 +36,17 @@ def read_all_users(db: Session):
 
 
 def update_user_email(db: Session, user: schemas.User, user_id: int):
-    """ "asdad"""
     user_in_db = db.query(models.User).filter(models.User.id == user_id).first()
     user_in_db.email = user.email
-    # return
+    return
+
+
+def update_user_password(db: Session, email: str, new_password: str):
+    hashed_password = create_hash(new_password)
+    user_in_db = db.query(models.User).filter(models.User.email == email).first()
+    user_in_db.password = hashed_password
+    return
+    pass
 
 
 def delete_user(db: Session, user_id: int):

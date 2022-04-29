@@ -1,5 +1,14 @@
 # sqlAlchemy models
-from sqlalchemy import Boolean, Column, Date, Float, ForeignKey, Integer, String
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import relationship
 
 from core.database import Base
@@ -61,7 +70,7 @@ class Password_Reset(Base):
 
     email = Column(String, ForeignKey("user.email"), primary_key=True)
     token_hash = Column(String)
-    expiration = Column(Date)
+    expiration = Column(DateTime)
     token_used = Column(Boolean, default=False)
 
     passwordreset_user = relationship("User", back_populates="user_passwordreset")

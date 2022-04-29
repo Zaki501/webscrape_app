@@ -8,7 +8,7 @@ import core.crud as crud
 import core.schemas as schemas
 from api.security import authenticate_user, create_access_token
 from core.database import get_db
-from core.security import ACCESS_TOKEN_EXPIRE_MINUTES, generate_token
+from core.security import ACCESS_TOKEN_EXPIRE_MINUTES, generate_token, is_expired
 from limiter import limiter
 
 router = APIRouter(tags=["Auth"], prefix="/api/auth")
@@ -74,6 +74,7 @@ async def send_token_to_email(
     return {
         "message": "Reset Code sent to email",
         "token": token,
+        "email": email,
         "url": f"{request.base_url}",
         "url2": f"{request.base_url}api/auth/reset_password/{email}&{token}",
     }
@@ -82,13 +83,29 @@ async def send_token_to_email(
 @router.get("/reset_password/{email}&{token}")
 @limiter.limit("3/minute")
 async def new_password(
-    email: str, token: str, request: Request, db: Session = Depends(get_db)
+    email: str,
+    token: str,
+    request: Request,
+    new_password: str = "1234",
+    db: Session = Depends(get_db),
 ):
     """Rate limited - 3 attempts per minute"""
-    # match email and token to db
+    # resend token endpoint
+    # new_password
 
-    # if no match, raise error "link already used, request another"
-    # if is expire, raise error "link expired, request another"
+    # match email and token to db
+    match = crud.read_password_reset(db, email)
+    if match is None:
+        raise HTTPException(
+            status_code=400, detail="Link already used, request another"
+        )
+    if is_expired(match.expiration):
+        raise HTTPException(status_code=400, detail="Link is expired, request another")
     # email and token matches - allow user to choose new password
 
-    return {"email": email, "token": token, "url": request.url._url}
+    return {
+        "email": email,
+        "token": token,
+        "new_pass": new_password,
+        "url": request.url._url,
+    }
