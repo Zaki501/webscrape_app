@@ -5,7 +5,7 @@ existing_user = {
     "username": "123",
     "email": "123",
     "full_name": "123",
-    "password": "123",
+    "password": "12345",
 }
 
 new_user = random_user()
@@ -20,7 +20,11 @@ def test_unauthorised_access():
 def test_login():
     response = client.post(
         url="/api/auth/login",
-        data={"grant_type": "password", "username": "123", "password": "123"},
+        data={
+            "grant_type": "password",
+            "username": existing_user["username"],
+            "password": existing_user["password"],
+        },
     )
     assert response.status_code == 200
     assert len(response.json()["access_token"]) == 121

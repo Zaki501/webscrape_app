@@ -15,6 +15,11 @@ class TokenData(BaseModel):
     email: Optional[str] = None
 
 
+class ResetToken(BaseModel):
+    email: str
+    token: str
+
+
 ############ User
 
 

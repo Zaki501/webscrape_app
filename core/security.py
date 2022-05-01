@@ -31,7 +31,7 @@ def generate_token():
 
 def create_expiry_datetime():
     now = datetime.datetime.now()
-    extra_time = datetime.timedelta(minutes=30)
+    extra_time = datetime.timedelta(minutes=15)
     return now + extra_time
 
 

@@ -41,12 +41,15 @@ def update_user_email(db: Session, user: schemas.User, user_id: int):
     return
 
 
-def update_user_password(db: Session, email: str, new_password: str):
+def update_user_password(db: Session, email: str, new_password: str) -> schemas.User:
     hashed_password = create_hash(new_password)
     user_in_db = db.query(models.User).filter(models.User.email == email).first()
-    user_in_db.password = hashed_password
-    return
-    pass
+
+    user_in_db.hashed_password = hashed_password
+    db.add(user_in_db)
+    db.commit()
+    db.refresh(user_in_db)
+    return user_in_db
 
 
 def delete_user(db: Session, user_id: int):
@@ -165,6 +168,20 @@ def read_password_reset(
         .filter(models.Password_Reset.email == email)
         .first()
     )
+
+
+def update_password_reset(db: Session, email: str):
+    """After being used, mark token as used"""
+    user = (
+        db.query(models.Password_Reset)
+        .filter(models.Password_Reset.email == email)
+        .first()
+    )
+    user.token_used = True
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 def delete_password_reset(db: Session, email: str):

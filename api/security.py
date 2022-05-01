@@ -5,10 +5,10 @@ from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from core.crud import read_user_by_email
+from core.crud import read_password_reset, read_user_by_email
 from core.database import get_db
-from core.schemas import TokenData, User
-from core.security import ALGORITHM, SECRET_KEY, oauth2_scheme, verify_hash
+from core.schemas import ResetToken, TokenData, User
+from core.security import ALGORITHM, SECRET_KEY, is_expired, oauth2_scheme, verify_hash
 
 
 def authenticate_user(db: Session, email: str, password: str):
@@ -69,3 +69,26 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+async def authenticate_reset_token(
+    email: str,
+    token: str,
+    db: Session = Depends(get_db),
+) -> ResetToken:
+    user = read_password_reset(db, email)
+    if user is None:
+        raise HTTPException(
+            status_code=400, detail="Link already used, request another"
+        )
+
+    if not verify_hash(token, user.token_hash):
+        raise HTTPException(status_code=400, detail="Invalid hash")
+
+    if is_expired(user.expiration):
+        raise HTTPException(status_code=400, detail="Link is expired, request another")
+
+    if user.token_used:
+        raise HTTPException(status_code=400, detail="Token Used already")
+
+    return ResetToken(email=email, token=token)
