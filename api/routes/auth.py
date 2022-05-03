@@ -144,5 +144,5 @@ async def confirm_token(
 @router.post("/authenticate_token/{email}&{token}")
 async def reset_password(new_password: str, db: Session = Depends(get_db)):
     """After the token is confirmed, it will route to this endpoint"""
-
+    # redirect to another endpoin, chnge query params in redirect
     pass
