@@ -27,7 +27,7 @@ def read_user_by_id(db: Session, id: int) -> schemas.User:
     return db.query(models.User).filter(models.User.id == id).first()
 
 
-def read_user_by_email(db: Session, email: str) -> schemas.User:
+def read_user_by_email(db: Session, email: str) -> schemas.UserInDB:
     return db.query(models.User).filter(models.User.email == email).first()
 
 

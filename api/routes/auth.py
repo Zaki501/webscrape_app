@@ -10,9 +10,10 @@ from api.security import (
     authenticate_reset_token,
     authenticate_user,
     create_access_token,
+    create_temp_access_token,
 )
 from core.database import get_db
-from core.security import ACCESS_TOKEN_EXPIRE_MINUTES, generate_token
+from core.security import ACCESS_TOKEN_EXPIRE_MINUTES
 from limiter import limiter
 
 router = APIRouter(tags=["Auth"], prefix="/api/auth")
@@ -36,6 +37,55 @@ async def login_for_access_token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@router.post("/forgot_password_link")
+async def dfaf(email: str, request: Request, db: Session = Depends(get_db)):
+    """Create token w/expiry, post to email
+
+    Sends JWT with email and expiry, secret is user's hashed password
+    """
+
+    user = crud.read_user_by_email(db, email)
+    if not user:
+        raise HTTPException(status_code=400, detail="Email doesn't exist")
+
+    jwt_access_token = create_temp_access_token(
+        data={"sub": user.email},
+        secret=user.hashed_password,
+        expires_delta=timedelta(minutes=15),
+    )
+
+    # hash with current pass hash? this method doesnt require a reset pass database
+    # email hashed with current pass
+    # if current pass changes, signature becomes invalid, so can only be used once
+    # user receives email and
+    return {
+        "message": "Reset Code sent to email",
+        "email": email,
+        "reset_url": f"{request.base_url}api/auth/forgot_password_reset/{jwt_access_token}",
+    }
+
+
+@router.post("/forgot_password_reset/{token}")
+async def dfg(token: str):
+    # = Depends(reset_pass_jwt_check)
+    """Authenticate token, respond with success
+
+    Decode JWT, verify using secret(?)"""
+    try:
+        # decode/verify token
+        # respond with success (or acces token?) if it works
+        pass
+    except HTTPException():
+        raise HTTPException()
+    pass
+
+
+# @router.post("/change_password/{}")
+# async def dfaf(email: str = Depends(reset_pass_jwt_check)):
+#     """ Authenticate token, respond with success"""
+#     pass
+
+
 @router.post("/register", response_model=schemas.User)
 async def create_user(
     user: schemas.UserCreate, db: Session = Depends(get_db)
@@ -46,42 +96,42 @@ async def create_user(
     return crud.create_user(db=db, user=user)
 
 
-@router.post("/forgot_password")
-async def send_token_to_email(
-    email: str, request: Request, db: Session = Depends(get_db)
-):
-    # create token, store in ResetPassword
-    # send token to users email, as URL
+# @router.post("/forgot_password")
+# async def send_token_to_email(
+#     email: str, request: Request, db: Session = Depends(get_db)
+# ):
+#     # create token, store in ResetPassword
+#     # send token to users email, as URL
 
-    # user enters email for forgotten password
-    # if user doesnt exist, raise error
-    # create token for user, send in email
-    # hash token and add to db
+#     # user enters email for forgotten password
+#     # if user doesnt exist, raise error
+#     # create token for user, send in email
+#     # hash token and add to db
 
-    # current tokens are security risk? they are the same each minute
-    # rate? limit users password guesses
-    # check if reset request already sent
+#     # current tokens are security risk? they are the same each minute
+#     # rate? limit users password guesses
+#     # check if reset request already sent
 
-    # totp tokens are time-based, and independent of client and server
-    # look into google auth
+#     # totp tokens are time-based, and independent of client and server
+#     # look into google auth
 
-    # if user not in users table, return error
-    # if user in resetpassword table, delete them
+#     # if user not in users table, return error
+#     # if user in resetpassword table, delete them
 
-    user = crud.read_user_by_email(db, email)
-    if not user:
-        raise HTTPException(status_code=400, detail="Email doesn't exist")
-    if crud.read_password_reset(db, email) is not None:
-        crud.delete_password_reset(db, email)
-    token = generate_token()
-    crud.create_password_reset(db, email, token)
-    return {
-        "message": "Reset Code sent to email",
-        "token": token,
-        "email": email,
-        "url": f"{request.base_url}",
-        "reset_url": f"{request.base_url}api/auth/authenticate_token/{email}&{token}",
-    }
+#     user = crud.read_user_by_email(db, email)
+#     if not user:
+#         raise HTTPException(status_code=400, detail="Email doesn't exist")
+#     if crud.read_password_reset(db, email) is not None:
+#         crud.delete_password_reset(db, email)
+#     token = generate_token()
+#     crud.create_password_reset(db, email, token)
+#     return {
+#         "message": "Reset Code sent to email",
+#         "token": token,
+#         "email": email,
+#         "url": f"{request.base_url}",
+#         "reset_url": f"{request.base_url}api/auth/authenticate_token/{email}&{token}",
+#     }
 
 
 @router.get("/authenticate_token/{email}&{token}")
@@ -131,6 +181,7 @@ async def confirm_token(
 
     # https://supertokens.com/blog/implementing-a-forgot-password-flow
 
+    # https://melodiessim.netlify.app/Reset%20Password%20Flow%20Using%20JWT/
     return {
         "success": "success",
         # "email": user.email,
@@ -141,8 +192,10 @@ async def confirm_token(
     }
 
 
-@router.post("/authenticate_token/{email}&{token}")
-async def reset_password(new_password: str, db: Session = Depends(get_db)):
-    """After the token is confirmed, it will route to this endpoint"""
-    # redirect to another endpoin, chnge query params in redirect
-    pass
+# add scope to this auth, or use depends?
+
+# @router.post("/authenticate_token/{email}&{token}")
+# async def reset_password(new_password: str, db: Session = Depends(get_db)):
+#     """After the token is confirmed, it will route to this endpoint"""
+#     # redirect to another endpoin, chnge query params in redirect
+#     pass

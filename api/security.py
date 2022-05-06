@@ -23,6 +23,28 @@ def authenticate_user(db: Session, email: str, password: str):
 
 #######################################################
 
+# data = {email, token = generate_token()}
+# encode data as jwt: create_access_token(data, time_delta))
+# decode data:
+
+
+def create_temp_access_token(data: dict, secret: str, expires_delta: timedelta):
+    """For pass reset only
+
+    Users current pass hash used as secret to generate a JWT token"""
+    to_encode = data.copy()
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, secret, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+def verify_temp_access_token(db: Session = Depends(get_db)):
+    """"""
+
+
+#######################################################
+
 # Encode JWT token
 
 
@@ -76,19 +98,19 @@ async def authenticate_reset_token(
     token: str,
     db: Session = Depends(get_db),
 ) -> ResetToken:
-    user = read_password_reset(db, email)
-    if user is None:
+    user_pass_reset = read_password_reset(db, email)
+    if user_pass_reset is None:
         raise HTTPException(
             status_code=400, detail="Link already used, request another"
         )
 
-    if not verify_hash(token, user.token_hash):
+    if not verify_hash(token, user_pass_reset.token_hash):
         raise HTTPException(status_code=400, detail="Invalid hash")
 
-    if is_expired(user.expiration):
+    if is_expired(user_pass_reset.expiration):
         raise HTTPException(status_code=400, detail="Link is expired, request another")
 
-    if user.token_used:
+    if user_pass_reset.token_used:
         raise HTTPException(status_code=400, detail="Token Used already")
 
     return ResetToken(email=email, token=token)
