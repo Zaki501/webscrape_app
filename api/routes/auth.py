@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -9,6 +9,7 @@ import core.schemas as schemas
 from api.security import (
     authenticate_reset_token,
     authenticate_user,
+    confirm_reset_token,
     create_access_token,
     create_temp_access_token,
 )
@@ -54,6 +55,8 @@ async def dfaf(email: str, request: Request, db: Session = Depends(get_db)):
         expires_delta=timedelta(minutes=15),
     )
 
+    # return {"access_token": jwt_access_token, "token_type": "bearer"}
+
     # hash with current pass hash? this method doesnt require a reset pass database
     # email hashed with current pass
     # if current pass changes, signature becomes invalid, so can only be used once
@@ -65,25 +68,57 @@ async def dfaf(email: str, request: Request, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/forgot_password_reset/{token}")
-async def dfg(token: str):
+@router.get("/forgot_password_reset/{token}")
+async def dfg(token: str, response: Response, db: Session = Depends(get_db)):
     # = Depends(reset_pass_jwt_check)
     """Authenticate token, respond with success
 
-    Decode JWT, verify using secret(?)"""
-    try:
-        # decode/verify token
-        # respond with success (or acces token?) if it works
-        pass
-    except HTTPException():
-        raise HTTPException()
-    pass
+    Decode JWT and verify"""
+    # try:
+    #     # decode/verify token
+    #     # respond with success (or acces token?) if it works
+    #     pass
+    # except:
+    #     raise HTTPException(status_code=400, detail="Invalid url, already used")
+    # pass
+
+    # user = confirm_reset_token(token, db)
+    # return {"token": token, "user" : user}
+    # (user, token) = data
+    # https://fastapi.tiangolo.com/advanced/security/http-basic-auth/
+    # https://testdriven.io/blog/fastapi-jwt-auth/#jwt-authentication
+
+    (access_token, payload) = confirm_reset_token(token, db)
+    response.set_cookie(key="reset_token", value=access_token, httponly=True)
+    return {"success": "Cookie created"}
 
 
-# @router.post("/change_password/{}")
-# async def dfaf(email: str = Depends(reset_pass_jwt_check)):
-#     """ Authenticate token, respond with success"""
-#     pass
+@router.post("/change_password/{}")
+async def sdsds(
+    new_password: str,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    """User enters new password
+
+    After being redirected to change password upon succesful login,
+    extract user from browser cookie, if valid change password."""
+    token = request.cookies["reset_token"]
+    # verify token
+    (_, payload) = confirm_reset_token(token, db)
+    email = payload["sub"]
+    # update user passwrod
+    crud.update_user_password(db, email, new_password)
+    # delete cookie
+    response.delete_cookie("access_token")
+    return (request.cookies["reset_token"], payload)
+
+
+@router.get("/del_cookie")
+async def dfsfs(response: Response):
+    response.delete_cookie("access_token")
+    return {"success": "Cookie Deleted"}
 
 
 @router.post("/register", response_model=schemas.User)

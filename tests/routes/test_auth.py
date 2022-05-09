@@ -5,7 +5,7 @@ existing_user = {
     "username": "123",
     "email": "123",
     "full_name": "123",
-    "password": "12345",
+    "password": "test",
 }
 
 new_user = random_user()

@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -114,3 +115,48 @@ async def authenticate_reset_token(
         raise HTTPException(status_code=400, detail="Token Used already")
 
     return ResetToken(email=email, token=token)
+
+
+def confirm_reset_token(token: str, db: Session):
+    # if this is async it throws an error for some reason
+    """After user clicks reset link, attempt to confirm it
+
+    Confirm by checking the token isnt expired, and that the
+    JWT token is verified (secret should be current password,
+    if its invalid then it must have been changed already
+    )
+    Return user if confirmed"""
+
+    try:
+        unverified_payload = jwt.get_unverified_claims(token)
+    except JWTError:
+        raise HTTPException(status_code=400, detail="unverified jwt -  ERROR)")
+
+    if time.time() > (unverified_payload["exp"]):
+        raise HTTPException(status_code=400, detail="Token is expired")
+    user = read_user_by_email(db, unverified_payload["sub"])
+
+    if user is None:
+        raise HTTPException(status_code=400, detail="User no longer exists")
+    try:
+        verified_payload = jwt.decode(
+            token, user.hashed_password, algorithms=[ALGORITHM]
+        )
+    except JWTError:
+        raise HTTPException(
+            status_code=400, detail="Token is Invalid (JWT verification error)"
+        )
+
+    if not verified_payload:
+        raise HTTPException(status_code=400, detail="Invalid token (any reason)")
+    # user verified token, query current user
+    # return (user, token)
+
+    return (token, verified_payload)
+
+
+def abc():
+    """Extract user from access token in Cookie
+
+    Check signature and expiry"""
+    pass
