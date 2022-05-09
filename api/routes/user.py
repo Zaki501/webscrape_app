@@ -10,7 +10,9 @@ router = APIRouter(tags=["User"], prefix="/api/user")
 
 
 @router.get("/me", response_model=schemas.User)
-async def read_users_me(current_user: schemas.User = Depends(get_current_active_user)):
+async def read_users_me(
+    current_user: schemas.UserInDB = Depends(get_current_active_user),
+):
     return current_user
 
 
@@ -31,16 +33,3 @@ async def update_user_me(
     # user re enters password, and fills out form
     # if password matches (check this in front end), update user details
     return {"message": "test"}
-    pass
-
-
-# update email - send confirmation to current email, new email
-# update password - current password, new passwod
-# forgot password - send temp password to email
-
-
-# UPDATING USER?
-
-# change password
-# change email
-# change name

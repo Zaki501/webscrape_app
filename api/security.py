@@ -6,13 +6,14 @@ from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from core.crud import read_password_reset, read_user_by_email
+# from core.schemas import TokenData, User
+import core.schemas as schemas
+from core.crud import read_user_by_email
 from core.database import get_db
-from core.schemas import ResetToken, TokenData, User
-from core.security import ALGORITHM, SECRET_KEY, is_expired, oauth2_scheme, verify_hash
+from core.security import ALGORITHM, SECRET_KEY, oauth2_scheme, verify_hash
 
 
-def authenticate_user(db: Session, email: str, password: str):
+def authenticate_user(db: Session, email: str, password: str) -> schemas.UserInDB:
     """Verify email and password match"""
     user = read_user_by_email(db, email)
     if not user:
@@ -24,10 +25,6 @@ def authenticate_user(db: Session, email: str, password: str):
 
 #######################################################
 
-# data = {email, token = generate_token()}
-# encode data as jwt: create_access_token(data, time_delta))
-# decode data:
-
 
 def create_temp_access_token(data: dict, secret: str, expires_delta: timedelta):
     """For pass reset only
@@ -38,10 +35,6 @@ def create_temp_access_token(data: dict, secret: str, expires_delta: timedelta):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, secret, algorithm=ALGORITHM)
     return encoded_jwt
-
-
-def verify_temp_access_token(db: Session = Depends(get_db)):
-    """"""
 
 
 #######################################################
@@ -68,7 +61,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 async def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
-):
+) -> schemas.UserInDB:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -79,7 +72,7 @@ async def get_current_user(
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-        token_data = TokenData(email=email)
+        token_data = schemas.TokenData(email=email)
     except JWTError:
         raise credentials_exception
     user = read_user_by_email(db, email=token_data.email)
@@ -88,33 +81,12 @@ async def get_current_user(
     return user
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
+async def get_current_active_user(
+    current_user: schemas.UserInDB = Depends(get_current_user),
+) -> schemas.User:
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
-
-
-async def authenticate_reset_token(
-    email: str,
-    token: str,
-    db: Session = Depends(get_db),
-) -> ResetToken:
-    user_pass_reset = read_password_reset(db, email)
-    if user_pass_reset is None:
-        raise HTTPException(
-            status_code=400, detail="Link already used, request another"
-        )
-
-    if not verify_hash(token, user_pass_reset.token_hash):
-        raise HTTPException(status_code=400, detail="Invalid hash")
-
-    if is_expired(user_pass_reset.expiration):
-        raise HTTPException(status_code=400, detail="Link is expired, request another")
-
-    if user_pass_reset.token_used:
-        raise HTTPException(status_code=400, detail="Token Used already")
-
-    return ResetToken(email=email, token=token)
 
 
 def confirm_reset_token(token: str, db: Session):
@@ -138,6 +110,7 @@ def confirm_reset_token(token: str, db: Session):
 
     if user is None:
         raise HTTPException(status_code=400, detail="User no longer exists")
+
     try:
         verified_payload = jwt.decode(
             token, user.hashed_password, algorithms=[ALGORITHM]
@@ -149,14 +122,5 @@ def confirm_reset_token(token: str, db: Session):
 
     if not verified_payload:
         raise HTTPException(status_code=400, detail="Invalid token (any reason)")
-    # user verified token, query current user
-    # return (user, token)
 
     return (token, verified_payload)
-
-
-def abc():
-    """Extract user from access token in Cookie
-
-    Check signature and expiry"""
-    pass

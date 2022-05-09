@@ -20,7 +20,7 @@ from core.database import get_db
 router = APIRouter(tags=["Alert"], prefix="/api/alert")
 
 
-@router.get("/all")
+@router.get("/all", response_model=schemas.Alert)
 async def all_alerts(
     current_user: schemas.User = Depends(get_current_active_user),
     db: Session = Depends(get_db),

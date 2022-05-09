@@ -47,3 +47,13 @@ def test_valid_registration():
     assert response.json()["email"] == new_user["email"]
     assert response.json()["disabled"] is False
     pass
+
+
+def test_reset_password_flot():
+    """Password Reset Flow:
+
+    User forgets password, enters email address for reset link.
+    Link is sent to email (with user_email and expiry in payload).
+    User clicks link, if valid/not expired they're sent a Cookie w/ token.
+    User redirected to password reset.
+    """
