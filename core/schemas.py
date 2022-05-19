@@ -23,6 +23,10 @@ class ResetToken(BaseModel):
 ############ User
 
 
+class UserPassword(BaseModel):
+    password: str
+
+
 class UserBase(BaseModel):
     email: Optional[str] = None
 

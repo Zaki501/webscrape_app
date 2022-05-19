@@ -52,11 +52,14 @@ async def create_user(
 
 @router.post("/forgot_password_link")
 @limiter.limit("3/minute")
-async def dfaf(email: str, request: Request, db: Session = Depends(get_db)):
+async def dfaf(
+    email_base: schemas.UserBase, request: Request, db: Session = Depends(get_db)
+):
     """Create token w/expiry, post to email
 
     Sends JWT with email and expiry, secret is user's hashed password
     """
+    email = email_base.email
     user = crud.read_user_by_email(db, email)
     if not user:
         raise HTTPException(status_code=400, detail="Email doesn't exist")
@@ -83,9 +86,9 @@ async def verify_password_reset_token(
     return {"success": "Cookie created"}
 
 
-@router.post("/change_password/{}")
+@router.post("/change_password/")
 async def forgot_password_new_password(
-    new_password: str,
+    user_new_password: schemas.UserPassword,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
@@ -95,8 +98,10 @@ async def forgot_password_new_password(
     After being redirected to change password upon succesful login,
     extract user from browser cookie, if valid change password."""
     token = request.cookies["reset_token"]
+    new_password = user_new_password.password
     (_, payload) = confirm_reset_token(token, db)
     email = payload["sub"]
     crud.update_user_password(db, email, new_password)
     response.delete_cookie("access_token")
-    return (request.cookies["reset_token"], payload)
+    # return (request.cookies["reset_token"], payload)
+    return {"success": "New Password"}

@@ -10,7 +10,7 @@ from app.FirefoxWebDriver import FireFoxBrowser
 from app.main import extract_asin, track_item
 from app.PriceHistory import PriceHistory
 
-# @pytest.mark.integtest
+# @pytest.mark.app
 # def test_browser():
 #     """Go to a static website, grab title"""
 #     driver = FireFoxBrowser()
@@ -20,7 +20,7 @@ from app.PriceHistory import PriceHistory
 #         assert driver.title == "http://info.cern.ch"
 
 
-@pytest.mark.integtest
+@pytest.mark.app
 def test_pricehistory():
     """Enter an amazon asin, check if it returns an item"""
     item = "https://www.amazon.co.uk/dp/B00006I551/"
