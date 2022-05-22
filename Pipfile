@@ -14,6 +14,7 @@ selenium = "*"
 requests = "*"
 slowapi = "*"
 uvicorn = "*"
+python-dotenv = "*"
 
 [dev-packages]
 flake8 = "*"

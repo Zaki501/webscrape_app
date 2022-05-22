@@ -1,6 +1,7 @@
 notes.txt
 *.db
 z.py
+.env
 # .pre-commit-config.yaml
 # setup.cfg
 

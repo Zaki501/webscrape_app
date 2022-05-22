@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -13,8 +14,9 @@ from api.security import (
     create_temp_access_token,
 )
 from core.database import get_db
-from core.security import ACCESS_TOKEN_EXPIRE_MINUTES
 from limiter import limiter
+
+# from emailing.password_reset import send_password_reset_email
 
 router = APIRouter(tags=["Auth"], prefix="/api/auth")
 
@@ -33,7 +35,9 @@ async def login_for_access_token(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=int(os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"])
+    )
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
@@ -68,10 +72,12 @@ async def dfaf(
         secret=user.hashed_password,
         expires_delta=timedelta(minutes=15),
     )
+    url_link = f"{request.base_url}api/auth/forgot_password_reset/{jwt_access_token}"
+    # send_password_reset_email(email, url_link)
     return {
         "message": "Reset Code sent to email",
         "email": email,
-        "reset_url": f"{request.base_url}api/auth/forgot_password_reset/{jwt_access_token}",
+        "reset_url": url_link,
     }
 
 

@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -6,6 +7,8 @@ import core.models as models
 from api.routes import alert, auth, user
 from core.database import engine
 from limiter import limiter
+
+load_dotenv()
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()

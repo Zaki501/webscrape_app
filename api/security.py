@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime, timedelta
 from typing import Optional
@@ -10,7 +11,7 @@ from sqlalchemy.orm import Session
 import core.schemas as schemas
 from core.crud import read_user_by_email
 from core.database import get_db
-from core.security import ALGORITHM, SECRET_KEY, oauth2_scheme, verify_hash
+from core.security import oauth2_scheme, verify_hash
 
 
 def authenticate_user(db: Session, email: str, password: str) -> schemas.UserInDB:
@@ -33,7 +34,7 @@ def create_temp_access_token(data: dict, secret: str, expires_delta: timedelta):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, secret, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, secret, algorithm=os.environ["ALGORITHM"])
     return encoded_jwt
 
 
@@ -49,7 +50,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, key=os.environ["SECRET_KEY"], algorithm=os.environ["ALGORITHM"]
+    )
     return encoded_jwt
 
 
@@ -68,7 +71,9 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, key=os.environ["SECRET_KEY"], algorithm=os.environ["ALGORITHM"]
+        )
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
@@ -113,7 +118,7 @@ def confirm_reset_token(token: str, db: Session):
 
     try:
         verified_payload = jwt.decode(
-            token, user.hashed_password, algorithms=[ALGORITHM]
+            token=token, key=user.hashed_password, algorithms=os.environ["ALGORITHM"]
         )
     except JWTError:
         raise HTTPException(
